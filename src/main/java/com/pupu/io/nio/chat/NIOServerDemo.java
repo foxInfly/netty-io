@@ -10,7 +10,8 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
-/**
+/**NIO的操作过于繁琐，才有了Netty
+ *     就是对这一系列的繁琐操作进行封装
  * @author : lipu
  * @since : 2020-08-20 22:25
  */
@@ -78,9 +79,10 @@ public class NIOServerDemo {
 
     //处理业务
     private void process(SelectionKey key) throws Exception{
-        //针对每一种太给出一个反应
+        //针对每一种key给出一个反应
         if (key.isAcceptable()) {
             ServerSocketChannel server = (ServerSocketChannel) key.channel();
+            //这个方法体现非阻塞，不管你数据有没有准备好，你给我一个状态和反馈
             SocketChannel channel = server.accept();
             channel.configureBlocking(false);
             //当数据准备就绪的时候，更改状态为read,可读
