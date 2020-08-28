@@ -1,7 +1,6 @@
 package com.pupu.io.nio.buffer;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -19,7 +18,7 @@ public class DirectBuffer {
         FileInputStream fin = new FileInputStream("E://test.txt");
         FileChannel fcin = fin.getChannel();
 
-        FileOutputStream fout = new FileOutputStream(String.format("F:\\project\\IDEA\\study\\javaee57\\netty-io\\src\\test\\test.txt"));
+        FileOutputStream fout = new FileOutputStream("F:\\project\\IDEA\\study\\javaee57\\netty-io\\src\\test\\test.txt");
         FileChannel fcout = fout.getChannel();
 
         while (true){
