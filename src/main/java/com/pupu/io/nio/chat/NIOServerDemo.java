@@ -22,7 +22,7 @@ public class NIOServerDemo {
     private Selector selector;
     private ByteBuffer buffer = ByteBuffer.allocate(1024);
 
-    //初始化Selector(大堂经理)
+    //初始化Selector(大堂经理),
     public NIOServerDemo(int port) {
         //初始化通道（大堂经理），开门营业
         try {

@@ -1,11 +1,10 @@
 package com.pupu.io.nio.buffer;
 
-import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
-/**
+/**内存映射
  * @author : lipu
  * @since : 2020-08-28 21:47
  */
