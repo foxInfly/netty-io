@@ -39,11 +39,11 @@ public class NIOServerDemo1 {
 
         System.out.println(sf.format(new Date()) + ",listen on 8080.");
 
-        while (true) {
-            System.out.println(sf.format(new Date()) + ",开始轮询");
-            selector.select(); //这里会阻塞，至少有一个值
+            while (true) {
+                System.out.println(sf.format(new Date()) + ",开始轮询");
+                selector.select(); //这里会阻塞，至少有一个值
 
-            Set<SelectionKey> keys = selector.selectedKeys();
+                Set<SelectionKey> keys = selector.selectedKeys();
             System.out.println(sf.format(new Date()) + ",keys1 " + keys.size());
             Iterator<SelectionKey> iter = keys.iterator();
 
