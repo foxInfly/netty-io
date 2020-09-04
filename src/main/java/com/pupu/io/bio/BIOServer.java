@@ -30,7 +30,7 @@ public class BIOServer {
     }
 
 
-    private void listen() throws IOException {
+    private void listen() throws Exception {
         while (true) {
             //here will be blocked,while client access
             Socket client = server.accept();
@@ -53,12 +53,13 @@ public class BIOServer {
             System.out.println("----------------------------------------------------");
             if(i<0){
                 System.out.println("i:"+i);return;}
+                Thread.sleep(1000);
 
         }
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         new BIOServer(8080).listen();
     }
 }

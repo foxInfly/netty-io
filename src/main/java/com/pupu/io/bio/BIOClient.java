@@ -19,7 +19,7 @@ public class BIOClient {
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-        for (int i = 0; i <10 ; i++) {
+        for (int i = 0; i <2 ; i++) {
             Socket client = new Socket("localhost", 8080);
             OutputStream os = client.getOutputStream();
 
@@ -27,7 +27,7 @@ public class BIOClient {
             String data = sf.format(new Date())+",客户端第"+i+"次发送数据："+name;
             System.out.println(data);
 
-            Thread.sleep(5000L);
+//            Thread.sleep(5000L);
             os.write(data.getBytes());
             os.close();
             client.close();

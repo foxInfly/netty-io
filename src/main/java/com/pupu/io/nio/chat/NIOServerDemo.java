@@ -7,6 +7,8 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -16,9 +18,9 @@ import java.util.Set;
  * @since : 2020-08-20 22:25
  */
 public class NIOServerDemo {
-
+    private SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private int port = 8080;
-    //准备轮询器selctor（大堂经理），缓存buff(等候区)
+    //准备轮询器selctor，缓存buff
     private Selector selector;
     private ByteBuffer buffer = ByteBuffer.allocate(1024);
 
@@ -28,16 +30,14 @@ public class NIOServerDemo {
         try {
             this.port = port;
             ServerSocketChannel server = ServerSocketChannel.open();
-            //告诉别人地址，我在那里
             server.bind(new InetSocketAddress(this.port));
-            //BIO升级版本NIO，为了兼容BIO，NIO模型默认采用阻塞式
             server.configureBlocking(false);//关闭阻塞
 
-            //大堂经理准备就绪，接客
+            //开启轮询器
             selector = Selector.open();
 
 
-            //在门口竖牌子，正在营业
+            //把轮询器注册到ServerSocketChannel
             server.register(selector, SelectionKey.OP_ACCEPT);
 
 
@@ -48,23 +48,21 @@ public class NIOServerDemo {
 
 
     public void listen() {
-        System.out.println("listen on " + this.port + ".");
+        System.out.println(sf.format(new Date())+",listen on " + this.port + ".");
 
         //轮询主线程
-
         try {
-
             while (true) {
-                //大堂经理在叫号
+                System.out.println("开始轮询");
                 selector.select();
-                //拿到所有的号子
                 Set<SelectionKey> keys = selector.selectedKeys();
+                System.out.println(sf.format(new Date())+",keys " + keys.size());
                 Iterator<SelectionKey> iter = keys.iterator();
 
-                //不断地迭代，就叫轮询
                 //同步体现在这里，因为一次只能拿一个key，处理一种状态
                 while (iter.hasNext()){
                     SelectionKey key = iter.next();
+                    System.out.println(sf.format(new Date())+",SelectionKey " + key.toString());
                     iter.remove();
                     //每一个key代表一种状态，对应一个业务
                     process(key);
