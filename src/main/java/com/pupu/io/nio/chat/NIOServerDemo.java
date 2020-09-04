@@ -24,9 +24,9 @@ public class NIOServerDemo {
     private Selector selector;
     private ByteBuffer buffer = ByteBuffer.allocate(1024);
 
-    //初始化Selector(大堂经理),
+    //初始化Selector
     public NIOServerDemo(int port) {
-        //初始化通道（大堂经理），开门营业
+        //初始化通道
         try {
             this.port = port;
             ServerSocketChannel server = ServerSocketChannel.open();
@@ -53,7 +53,8 @@ public class NIOServerDemo {
         //轮询主线程
         try {
             while (true) {
-                System.out.println("开始轮询");
+                //这里会阻塞，至少有一个值
+                System.out.println(sf.format(new Date())+",开始轮询");
                 selector.select();
                 Set<SelectionKey> keys = selector.selectedKeys();
                 System.out.println(sf.format(new Date())+",keys " + keys.size());
@@ -62,8 +63,8 @@ public class NIOServerDemo {
                 //同步体现在这里，因为一次只能拿一个key，处理一种状态
                 while (iter.hasNext()){
                     SelectionKey key = iter.next();
-                    System.out.println(sf.format(new Date())+",SelectionKey " + key.toString());
                     iter.remove();
+                    System.out.println(sf.format(new Date())+",keys " + keys.size());
                     //每一个key代表一种状态，对应一个业务
                     process(key);
                 }
@@ -82,27 +83,31 @@ public class NIOServerDemo {
             ServerSocketChannel server = (ServerSocketChannel) key.channel();
             //这个方法体现非阻塞，不管你数据有没有准备好，你给我一个状态和反馈
             SocketChannel channel = server.accept();
+            System.out.println(sf.format(new Date())+",RemoteAddress1："+ channel.getRemoteAddress());
             channel.configureBlocking(false);
             //当数据准备就绪的时候，更改状态为read,可读
             key = channel.register(selector,SelectionKey.OP_READ);
+
         }else if (key.isReadable()) {
             //key.channel(),从多路复用器中拿到客户端的引用
             SocketChannel channel = (SocketChannel) key.channel();
+            System.out.println(sf.format(new Date())+",RemoteAddress2："+ channel.getRemoteAddress());
             int len = channel.read(buffer);
             if (len >0) {
                 buffer.flip();
                 String content = new String(buffer.array(),0,len);
                 key = channel.register(selector,SelectionKey.OP_WRITE);
                 //在key上携带一个附件，一会写出去
-                key.attach(content);
-                System.out.println("读取内容："+content);
+                key.attach("我是服务器");
+                System.out.println(sf.format(new Date())+",读取内容："+content);
             }
         }else if (key.isWritable()) {
             SocketChannel channel = (SocketChannel) key.channel();
-
+            System.out.println(sf.format(new Date())+",RemoteAddress3："+ channel.getRemoteAddress());
             String content = (String) key.attachment();
-            channel.write(ByteBuffer.wrap(("输出："+content).getBytes()));
-
+            Thread.sleep(1000);
+            channel.write(ByteBuffer.wrap((sf.format(new Date())+",输出："+content).getBytes()));
+            System.out.println("写出完毕------------------------------------------");
             channel.close();
         }
     }
