@@ -57,14 +57,14 @@ public class NIOServerDemo {
                 System.out.println(sf.format(new Date())+",开始轮询");
                 selector.select();
                 Set<SelectionKey> keys = selector.selectedKeys();
-                System.out.println(sf.format(new Date())+",keys " + keys.size());
+                System.out.println(sf.format(new Date())+",keys1 " + keys.size());
                 Iterator<SelectionKey> iter = keys.iterator();
 
                 //同步体现在这里，因为一次只能拿一个key，处理一种状态
                 while (iter.hasNext()){
                     SelectionKey key = iter.next();
                     iter.remove();
-                    System.out.println(sf.format(new Date())+",keys " + keys.size());
+                    System.out.println(sf.format(new Date())+",keys2 " + keys.size());
                     //每一个key代表一种状态，对应一个业务
                     process(key);
                 }
