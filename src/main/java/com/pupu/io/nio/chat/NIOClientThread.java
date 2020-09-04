@@ -9,11 +9,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-/**Socket --client
+/**
+ * Socket --client
+ *
  * @author : lipu
  * @since : 2020-08-20 21:26
  */
-public class NIOClientThread extends Thread{
+public class NIOClientThread extends Thread {
 
 
     @SneakyThrows
@@ -22,28 +24,29 @@ public class NIOClientThread extends Thread{
         SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
-            Socket client = new Socket("localhost", 8080);
-            OutputStream os = client.getOutputStream();
-            InputStream is = client.getInputStream();
+        Socket client = new Socket("localhost", 8080);
+        OutputStream os = client.getOutputStream();
+        InputStream is = client.getInputStream();
 
-            String name = UUID.randomUUID().toString();
-            String data = Thread.currentThread().getName()+":"+sf.format(new Date())+",客户端发送数据："+name;
-            System.out.println(data);
+        String name = UUID.randomUUID().toString();
+        String data = Thread.currentThread().getName() + ":" + sf.format(new Date()) + ",客户端发送数据：" + name;
+        System.out.println(data);
 
 //            Thread.sleep(5000L);
-            os.write(data.getBytes());
+        os.write(data.getBytes());
 
-            byte[] bytes = new byte[1024];
-            int len =0;
-            while ((len=is.read(bytes))!=-1){
-                String str = new String(bytes,0,len);
-                System.out.println(Thread.currentThread().getName()+"  "+str);
-            }
-            Thread.sleep(6000L);
-            is.close();
+        byte[] bytes = new byte[1024];
+        int len = 0;
+        while ((len = is.read(bytes)) != -1) {
+            String str = new String(bytes, 0, len);
+            System.out.println(Thread.currentThread().getName() + "  " + str);
+        }
+        System.out.println("====test");
+        Thread.sleep(6000L);
+        is.close();
 
-            os.close();
-            client.close();
+        os.close();
+        client.close();
 
 
     }
