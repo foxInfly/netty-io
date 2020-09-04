@@ -62,6 +62,7 @@ public class NIOServerDemo1 {
                     channel.configureBlocking(false);
                     //当数据准备就绪的时候，更改状态为read,可读
                     channel.register(selector, SelectionKey.OP_READ);
+                    Thread.sleep(1000);
                     System.out.println("更改客户端channel状态为Read");
                     System.out.println(sf.format(new Date()) + ",selector.selectedKeys().size() " + selector.selectedKeys().size());
 
@@ -73,6 +74,7 @@ public class NIOServerDemo1 {
                     if (len > 0) {
                         buffer.flip();
                         String content = new String(buffer.array(), 0, len);
+                        Thread.sleep(1000);
                         key = channel.register(selector, SelectionKey.OP_WRITE);
                         //1在key上携带一个附件，一会写出去
                         key.attach("我是服务器.");
