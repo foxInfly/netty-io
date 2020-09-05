@@ -9,6 +9,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -21,11 +23,12 @@ import java.util.Set;
  * 功能4：服务器收到已登录客户端输入内容，转发至其他登录客户端。
  */
 public class NIOChatServer {
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private int port = 8080;
-    private Charset charset = Charset.forName("UTF-8");
+    private Charset charset = Charset.forName("UTF-8");     //
     //用来记录在线人数，以及昵称
-    private static HashSet<String> users = new HashSet<String>();
+    private static HashSet<String> users = new HashSet<String>();  //record the numer,nickname of online pepole
     
     private static String USER_EXIST = "系统提示：该昵称已经存在，请换一个昵称";
     //相当于自定义协议格式，与客户端协商好
@@ -36,15 +39,14 @@ public class NIOChatServer {
     public NIOChatServer(int port) throws IOException{
 		
 		this.port = port;
-		
-		ServerSocketChannel server = ServerSocketChannel.open();
-		
-		server.bind(new InetSocketAddress(this.port));
-		server.configureBlocking(false);
+		//1.create ServerSocketChannel
+		ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+        serverSocketChannel.bind(new InetSocketAddress(this.port));
+        serverSocketChannel.configureBlocking(false);
 		
 		selector = Selector.open();
-		
-		server.register(selector, SelectionKey.OP_ACCEPT);
+
+        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 		
 		System.out.println("服务已启动，监听端口是：" + this.port);
 	}
@@ -61,6 +63,7 @@ public class NIOChatServer {
             while(iterator.hasNext()) {
 				SelectionKey key = (SelectionKey) iterator.next();
 				iterator.remove();
+                System.out.println("监听处理访问"+selector.keys().size());
 				process(key);
             }
         }
@@ -72,14 +75,15 @@ public class NIOChatServer {
         if(key.isAcceptable()){
         	ServerSocketChannel server = (ServerSocketChannel)key.channel();
             SocketChannel client = server.accept();
-            //非阻塞模式
-            client.configureBlocking(false);
+
+            client.configureBlocking(false);     //非阻塞模式
             //注册选择器，并设置为读取模式，收到一个连接请求，然后起一个SocketChannel，并注册到selector上，之后这个连接的数据，就由这个SocketChannel处理
             client.register(selector, SelectionKey.OP_READ);
             
             //将此对应的channel设置为准备接受其他客户端请求
             key.interestOps(SelectionKey.OP_ACCEPT);
-//            System.out.println("有客户端连接，IP地址为 :" + sc.getRemoteAddress());
+//            System.out.println(sf.format(new Date())+""+key.toString());
+            System.out.println("有客户端连接，IP地址为 :" + client.getRemoteAddress());
             client.write(charset.encode("请输入你的昵称"));
         }
         //处理来自客户端的数据读取请求
@@ -146,6 +150,7 @@ public class NIOChatServer {
     
     public void broadCast(SocketChannel client, String content) throws IOException {
         //广播数据到所有的SocketChannel中
+        System.out.println("广播："+selector.keys().size());
         for(SelectionKey key : selector.keys()) {
             Channel targetchannel = key.channel();
             //如果client不为空，不回发给发送此内容的客户端

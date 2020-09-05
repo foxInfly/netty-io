@@ -7,11 +7,14 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
 public class NIOChatClient {
+    SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final InetSocketAddress serverAdrress = new InetSocketAddress("localhost", 8080);
     private Selector selector = null;
@@ -24,10 +27,13 @@ public class NIOChatClient {
     
     
     public NIOChatClient() throws IOException{
-        selector = Selector.open();
-        //连接远程主机的IP和端口
-        client = SocketChannel.open(serverAdrress);
+
+        //1.create SocketChannel
+        client = SocketChannel.open(serverAdrress);     //连接远程主机的IP和端口
         client.configureBlocking(false);
+
+        //2.regist SocketChannel to selector
+        selector = Selector.open();
         client.register(selector, SelectionKey.OP_READ);
     }
     
@@ -37,13 +43,15 @@ public class NIOChatClient {
         //开辟一个新线程往服务器端写数据
         new Writer().start();
 	}
-    
+
+    /**
+     * 在主线程中 从键盘读取数据输入到服务器端
+     */
     private class Writer extends Thread{
 
 		@Override
 		public void run() {
 			try{
-				//在主线程中 从键盘读取数据输入到服务器端
 		        Scanner scan = new Scanner(System.in);
 		        while(scan.hasNextLine()){
 		            String line = scan.nextLine();
@@ -87,6 +95,7 @@ public class NIOChatClient {
         }
 
         private void process(SelectionKey key) throws IOException {
+            System.out.println(sf.format(new Date())+""+key.toString());
             if(key.isReadable()){
                 //使用 NIOServerDemoBak 读取 Channel中的数据，这个和全局变量client是一样的，因为只注册了一个SocketChannel
                 //client既能写也能读，这边是读
