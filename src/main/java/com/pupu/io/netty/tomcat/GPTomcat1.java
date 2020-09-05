@@ -103,10 +103,10 @@ public class GPTomcat1 {
             if (msg instanceof HttpRequest) {
                 HttpRequest req = (HttpRequest) msg;
 
-                //转交给我们自己的request实现
-                GPRequest request = new GPRequest(ctx, req);
-                //转交给我们自己的response实现
-                GPResponse response = new GPResponse(ctx,req);
+                //转交给我们自己的request实现...
+                GPRequest request =  new GPRequest(ctx,  req);
+                //转交给我们自己的response实现...
+                GPResponse response =  new GPResponse(ctx, req);
                 //实际业务处理
                 String url = request.getUrl();
 
