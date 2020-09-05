@@ -53,21 +53,20 @@ public class GPTomcat1 {
 
 
         //2.创建对象
-        //Boss线程(池)
+        //Boss线程(池),Netty 的调度模块
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         //Worker线程(池)
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
         try {
-            //Netty服务
+            //Netty服务 Bootstrap is a factory class of netty
             //ServerBootstrap-->ServerSocketChannel-->newChannel, create Channel Object
             ServerBootstrap server = new ServerBootstrap();
 
             //3.配置参数
-            //链路式编程
             server.group(bossGroup,workerGroup)
-                    .channel(NioServerSocketChannel.class) //主线程处理类，看到这样的写法，底层就是用反射,最终clazz.newInstance()
-                    .childHandler(new ChannelInitializer<SocketChannel>() {//子线程处理类，Handler
+                    .channel(NioServerSocketChannel.class) //指定Channel类型，（这种写法，底层就是用反射,最终clazz.newInstance()）
+                    .childHandler(new ChannelInitializer<SocketChannel>() {//子线程处理类，处理数据的 Handler。
                         //客户端初始化处理
                         @Override
                         protected void initChannel(SocketChannel client){
