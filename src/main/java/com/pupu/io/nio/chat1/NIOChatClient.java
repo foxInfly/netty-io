@@ -28,27 +28,26 @@ public class NIOChatClient {
     
     public NIOChatClient() throws IOException{
 
-        //1.create SocketChannel
+        //1.create a SocketChannel,这里连接上，默认是走到Accept状态
         client = SocketChannel.open(serverAdrress);     //连接远程主机的IP和端口
+        System.out.println(sf.format(new Date())+""+client);
         client.configureBlocking(false);
 
-        //2.regist SocketChannel to selector
+        //2.crerate a selector
         selector = Selector.open();
+        //3.regist SocketChannel to selector,同时设置为读状态，就是对面来数据直接可以读了
         client.register(selector, SelectionKey.OP_READ);
     }
     
     public void session(){
-    	//开辟一个新线程从服务器端读数据
-        new Reader().start();
-        //开辟一个新线程往服务器端写数据
-        new Writer().start();
+        new Reader().start();//开辟一个新线程从服务器端读数据
+        new Writer().start();//开辟一个新线程往服务器端写数据
 	}
 
     /**
      * 在主线程中 从键盘读取数据输入到服务器端
      */
     private class Writer extends Thread{
-
 		@Override
 		public void run() {
 			try{
@@ -72,18 +71,21 @@ public class NIOChatClient {
 		}
     	
     }
-    
-    
+
+    /**
+     *从服务器端读数据
+     */
     private class Reader extends Thread {
         public void run() {
             try {
                 while(true) {
-                    int readyChannels = selector.select();
-                    if(readyChannels == 0) continue; 
+//                    int readyChannels = selector.select();
+//                    if(readyChannels == 0) continue;
+                    selector.select();
                     Set<SelectionKey> selectedKeys = selector.selectedKeys();  //可以通过这个方法，知道可用通道的集合
                     Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
                     while(keyIterator.hasNext()) {
-                         SelectionKey key = (SelectionKey) keyIterator.next();
+                         SelectionKey key = keyIterator.next();
                          keyIterator.remove();
                          process(key);
                     }
@@ -95,7 +97,10 @@ public class NIOChatClient {
         }
 
         private void process(SelectionKey key) throws IOException {
-            System.out.println(sf.format(new Date())+""+key.toString());
+            System.out.println(sf.format(new Date())+""+key.channel().toString());
+            System.out.println("key.isAcceptable()="+key.isAcceptable());
+            System.out.println("key.isReadable()="+key.isReadable());
+            System.out.println("key.isWritable()="+key.isWritable());
             if(key.isReadable()){
                 //使用 NIOServerDemoBak 读取 Channel中的数据，这个和全局变量client是一样的，因为只注册了一个SocketChannel
                 //client既能写也能读，这边是读
@@ -113,7 +118,11 @@ public class NIOChatClient {
                 	nickName = "";
                 }
                 System.out.println(content);
+
+
+                //更改本地的
                 key.interestOps(SelectionKey.OP_READ);
+                System.out.println("key.isReadable()="+key.isReadable());
             }
         }
     }
