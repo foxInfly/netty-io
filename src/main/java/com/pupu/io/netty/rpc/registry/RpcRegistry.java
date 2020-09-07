@@ -18,19 +18,21 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 public class RpcRegistry {
 
     private int port;
-    public RpcRegistry(int port){
-        this.port=port;
+
+    public RpcRegistry(int port) {
+        this.port = port;
     }
 
 
-    public void start(){
+    public void start() {
         //基于NIO来实现，Selector主线程池，Work线程（子线程）
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
+
         ServerBootstrap server = new ServerBootstrap();
         try {
-            server.group(bossGroup,workerGroup)
-                    .channel(NioServerSocketChannel.class)
+            server.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)  //创建ServerSocketChannel，用于接收客户端的连接请求
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel ch) throws Exception {
                             //在netty中，把所有的业务处理全部归总到了一个队列中
@@ -39,14 +41,14 @@ public class RpcRegistry {
                             //Pipline
                             ChannelPipeline pipeline = ch.pipeline();
 
-                            //就是对我们处理逻辑的封装
+                            //对处理逻辑封装
                             //对于自己定义协议的内容进行编解码
-                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,4,0,4));
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
                             //自定义编码器
                             pipeline.addLast(new LengthFieldPrepender(4));
                             //实参处理
-                            pipeline.addLast("encode",new ObjectEncoder());
-                            pipeline.addLast("decode",new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
+                            pipeline.addLast("encode", new ObjectEncoder());
+                            pipeline.addLast("decode", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)));
 
                             //前面的编解码，就是完成对数据的解析
                             //最后一步，执行属于自己的逻辑
@@ -55,12 +57,13 @@ public class RpcRegistry {
                             pipeline.addLast(new RegistryHandler());
 
                         }
-                    }).option(ChannelOption.SO_BACKLOG,128)
-                    .childOption(ChannelOption.SO_KEEPALIVE,true);
+                    })
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true);
 
             //正式启动服务，相当于用一个死循环开始轮询
             ChannelFuture future = server.bind(this.port).sync();
-            System.out.println("GP RPC Registry start listen at "+this.port);
+            System.out.println("GP RPC Registry start listen at " + this.port);
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();

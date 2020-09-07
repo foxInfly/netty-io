@@ -65,10 +65,6 @@ public class RegistryHandler extends ChannelInboundHandlerAdapter {
                 classNames.add(packageName + "." + file.getName().replace(".class", "").trim());
             }
         }
-
-
-
-
     }
 
 
