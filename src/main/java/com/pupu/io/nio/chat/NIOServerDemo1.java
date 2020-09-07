@@ -34,6 +34,7 @@ public class NIOServerDemo1 {
         Selector selector = Selector.open();
 
         //3.register the ServerSocketChannel to special Selector
+        //将serverSocketChannel为accept状态的事件注册到Selector（一旦这个事件（游客户端建立连接）发生，则记录，selector.select()+1）
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
 
@@ -41,7 +42,7 @@ public class NIOServerDemo1 {
 
             while (true) {
                 System.out.println(sf.format(new Date()) + ",开始轮询");
-                selector.select(); //这里会阻塞，至少有一个值
+                selector.select(); //这里会阻塞，至少有一个值，相当于把BIO的accept和readInputStream的阻塞都转移到这里
 
                 Set<SelectionKey> keys = selector.selectedKeys();
             System.out.println(sf.format(new Date()) + ",keys1 " + keys.size());
@@ -59,7 +60,7 @@ public class NIOServerDemo1 {
                     SocketChannel channel = server.accept();
                     System.out.println(sf.format(new Date()) + ",RemoteAddress1：" + channel.getRemoteAddress());
                     channel.configureBlocking(false);
-                    //当数据准备就绪的时候，更改状态为read,可读
+                    //把当channel为READ状态的事件注册到Selector，（一旦这个事件发生，就会记录，selector.select()会+1）
                     channel.register(selector, SelectionKey.OP_READ);
                     Thread.sleep(1000);
                     System.out.println("更改客户端channel状态为Read");
@@ -68,12 +69,16 @@ public class NIOServerDemo1 {
                 } else if (key.isReadable()) {
                     //key.channel(),从多路复用器中拿到客户端的引用
                     SocketChannel channel = (SocketChannel) key.channel();
+                    System.out.println(sf.format(new Date()) + "key.isAcceptable()=" + key.isAcceptable());
+                    System.out.println(sf.format(new Date()) + "key.isReadable()=" + key.isReadable());
+                    System.out.println(sf.format(new Date()) + "key.isWritable()=" + key.isWritable());
                     System.out.println(sf.format(new Date()) + ",RemoteAddress2：" + channel.getRemoteAddress());
                     int len = channel.read(buffer);
                     if (len > 0) {
                         buffer.flip();
                         String content = new String(buffer.array(), 0, len);
                         Thread.sleep(1000);
+                        //给key重新赋值，改变其状态为写出，再次轮询则走写操作
                         key = channel.register(selector, SelectionKey.OP_WRITE);
                         //1在key上携带一个附件，一会写出去
                         key.attach("我是服务器.");
@@ -82,6 +87,9 @@ public class NIOServerDemo1 {
                     System.out.println(sf.format(new Date()) + ",selector.selectedKeys().size() " + selector.selectedKeys().size());
                 } else if (key.isWritable()) {
                     SocketChannel channel = (SocketChannel) key.channel();
+                    System.out.println(sf.format(new Date()) + "key.isAcceptable()=" + key.isAcceptable());
+                    System.out.println(sf.format(new Date()) + "key.isReadable()=" + key.isReadable());
+                    System.out.println(sf.format(new Date()) + "key.isWritable()=" + key.isWritable());
                     System.out.println(sf.format(new Date()) + ",RemoteAddress3：" + channel.getRemoteAddress());
                     String content = (String) key.attachment();
                     Thread.sleep(1000);
