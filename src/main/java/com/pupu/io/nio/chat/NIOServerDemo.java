@@ -85,7 +85,7 @@ public class NIOServerDemo {
             SocketChannel channel = server.accept();
             System.out.println(sf.format(new Date())+",RemoteAddress1："+ channel.getRemoteAddress());
             channel.configureBlocking(false);
-            //当数据准备就绪的时候，更改状态为read,可读
+            //注册事件同时更改key的事件状态为READ
             key = channel.register(selector,SelectionKey.OP_READ);
 
         }else if (key.isReadable()) {
@@ -96,6 +96,7 @@ public class NIOServerDemo {
             if (len >0) {
                 buffer.flip();
                 String content = new String(buffer.array(),0,len);
+                //注册事件同时更改key的事件状态为WRITE
                 key = channel.register(selector,SelectionKey.OP_WRITE);
                 //在key上携带一个附件，一会写出去
                 key.attach("我是服务器");
