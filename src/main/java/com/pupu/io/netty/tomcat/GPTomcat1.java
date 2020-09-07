@@ -82,7 +82,7 @@ public class GPTomcat1 {
             //4.启动服务器
             ChannelFuture f = server.bind(8080).sync();
 
-            System.out.println("GP Tomcat 已启动，坚挺的端口是： "+8080);
+            System.out.println("GP Tomcat 已启动，监听的端口是： "+8080);
 
             f.channel().closeFuture().sync();
 
